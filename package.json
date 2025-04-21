@@ -1,0 +1,94 @@
+{
+  "name": "django-test-path-handler",
+  "displayName": "Django Test Path Handler",
+  "description": "An extension that allows you to easily copy the run path for the current test file",
+  "version": "0.0.1",
+  "publisher": "user",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "djangoPathHandler.copyPathAsDotNotation",
+        "title": "Copy Path as Dot Notation"
+      },
+      {
+        "command": "djangoPathHandler.copyWithPrefixSuffix",
+        "title": "Copy Path with Prefix/Suffix"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "djangoPathHandler.copyPathAsDotNotation",
+          "group": "djangoPathHandler"
+        },
+        {
+          "command": "djangoPathHandler.copyWithPrefixSuffix",
+          "group": "djangoPathHandler"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "djangoPathHandler.copyPathAsDotNotation",
+        "key": "ctrl+alt+d",
+        "mac": "cmd+alt+d",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "djangoPathHandler.copyWithPrefixSuffix",
+        "key": "ctrl+alt+p",
+        "mac": "cmd+alt+p",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Django Path Handler",
+      "properties": {
+        "djangoPathHandler.prefix": {
+          "type": "string",
+          "default": "",
+          "description": "Text to add before the path"
+        },
+        "djangoPathHandler.suffix": {
+          "type": "string",
+          "default": "",
+          "description": "Text to add after the path"
+        },
+        "djangoPathHandler.trimFolders": {
+          "type": "number",
+          "default": 0,
+          "description": "Number of folders to remove from the beginning of the path"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.23.0",
+    "typescript": "^5.8.2",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "sinon": "^15.2.0",
+    "@types/sinon": "^10.0.19"
+  }
+}
