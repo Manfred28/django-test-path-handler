@@ -1,4 +1,6 @@
-# Django Test Path Handler
+# Something Something AI, I am not reading this
+
+## Django Test Path Handler
 
 An extension that allows you to easily copy the path of your test files using dot notation instead of slashes.
 
