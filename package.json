@@ -21,6 +21,10 @@
       {
         "command": "djangoPathHandler.copyWithPrefixSuffix",
         "title": "Copy Path with Prefix/Suffix"
+      },
+      {
+        "command": "djangoPathHandler.copyWithSelectedMethod",
+        "title": "Copy Path with Python Method"
       }
     ],
     "menus": {
@@ -32,6 +36,11 @@
         {
           "command": "djangoPathHandler.copyWithPrefixSuffix",
           "group": "djangoPathHandler"
+        },
+        {
+          "command": "djangoPathHandler.copyWithSelectedMethod",
+          "group": "djangoPathHandler",
+          "when": "editorLangId == python"
         }
       ]
     },
@@ -47,6 +56,12 @@
         "key": "ctrl+alt+p",
         "mac": "cmd+alt+p",
         "when": "editorTextFocus"
+      },
+      {
+        "command": "djangoPathHandler.copyWithSelectedMethod",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m",
+        "when": "editorTextFocus && editorLangId == python"
       }
     ],
     "configuration": {

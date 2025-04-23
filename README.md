@@ -10,6 +10,7 @@ An extension that allows you to easily copy the path of your test files using do
 - Configure a prefix to be added before the path
 - Configure a suffix to be added after the path
 - Trim a configurable number of folders from the beginning of the path
+- Detect Python class methods and include them in the path (e.g., `test_folder.tests.test_file.TestClass.test_method`)
 
 This extension is particularly useful for Django developers who need to run specific tests using the `python manage.py test` command, which accepts paths in dot notation.
 
@@ -20,6 +21,7 @@ This extension is particularly useful for Django developers who need to run spec
    - Use keyboard shortcuts:
      - `Copy Path as Dot Notation`: `Ctrl+Alt+D` / `Cmd+Alt+D`
      - `Copy Path with Prefix/Suffix`: `Ctrl+Alt+P` / `Cmd+Alt+P`
+     - `Copy Path with Python Method`: `Ctrl+Alt+M` / `Cmd+Alt+M` (Python files only)
    - Right-click in the editor and select from the context menu
    - Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for the commands
 
@@ -27,6 +29,26 @@ Example:
 - Original path: `project/app/tests/test_models.py`
 - Copied path: `project.app.tests.test_models`
 - With prefix `python manage.py test`: `python manage.py test project.app.tests.test_models`
+- With Python method: `python manage.py test project.app.tests.test_models.TestUser.test_create_user`
+
+### Python Method Detection
+
+The extension can automatically detect Python methods and include them in the path:
+
+- If text is selected, it will use that as the method name
+- If the cursor is on a method definition line, it extracts the method name
+- If the cursor is within a method, it detects both the method and its containing class
+- If only a class is found, it includes only the class name
+
+This is particularly useful for running specific test methods in Django:
+
+```
+# Original command
+python manage.py test app.tests.test_models
+
+# With method detection
+python manage.py test app.tests.test_models.TestUser.test_create_user
+```
 
 ## Extension Settings
 

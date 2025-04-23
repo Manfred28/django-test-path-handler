@@ -19,10 +19,14 @@ export function activate(context: vscode.ExtensionContext) {
 		convertAndCopyPath(true);
 	});
 
-	context.subscriptions.push(copyPathAsDotNotation, copyWithPrefixSuffix);
+	const copyWithSelectedMethod = vscode.commands.registerCommand('djangoPathHandler.copyWithSelectedMethod', () => {
+		convertAndCopyPath(true, true);
+	});
+
+	context.subscriptions.push(copyPathAsDotNotation, copyWithPrefixSuffix, copyWithSelectedMethod);
 }
 
-function convertAndCopyPath(usePrefixSuffix: boolean) {
+async function convertAndCopyPath(usePrefixSuffix: boolean, includeSelectedMethod: boolean = false) {
 	const editor = vscode.window.activeTextEditor;
 	if (!editor) {
 		vscode.window.showErrorMessage('No active editor found');
@@ -58,6 +62,14 @@ function convertAndCopyPath(usePrefixSuffix: boolean) {
 	
 	let dotPath = pathParts.join('.');
 	
+	// If we need to include the selected method
+	if (includeSelectedMethod && document.languageId === 'python') {
+		const selectedMethod = await extractPythonMethod(document, editor.selection);
+		if (selectedMethod) {
+			dotPath = `${dotPath}.${selectedMethod}`;
+		}
+	}
+	
 	if (usePrefixSuffix) {
 		const prefix = config.get<string>('prefix') || '';
 		const suffix = config.get<string>('suffix') || '';
@@ -86,6 +98,80 @@ function convertAndCopyPath(usePrefixSuffix: boolean) {
 	vscode.env.clipboard.writeText(dotPath).then(() => {
 		vscode.window.showInformationMessage(`Copied to clipboard: ${dotPath}`);
 	});
+}
+
+async function extractPythonMethod(document: vscode.TextDocument, selection: vscode.Selection): Promise<string | null> {
+	// If there's a selection, use it directly
+	if (!selection.isEmpty) {
+		return document.getText(selection);
+	}
+	
+	// If no text is selected, try to extract the current method and class
+	const position = selection.active;
+	const lineText = document.lineAt(position.line).text;
+	
+	// Check if cursor is on a method definition
+	const methodMatch = lineText.match(/\s*def\s+([a-zA-Z0-9_]+)\s*\(/);
+	if (methodMatch) {
+		const methodName = methodMatch[1];
+		const classInfo = await findContainingClass(document, position.line);
+		
+		if (classInfo) {
+			return `${classInfo}.${methodName}`;
+		}
+		return methodName;
+	}
+	
+	// Check surrounding context for method
+	return findMethodFromContext(document, position.line);
+}
+
+async function findContainingClass(document: vscode.TextDocument, currentLine: number): Promise<string | null> {
+	let lineIndex = currentLine;
+	
+	// Search upward for class definition
+	while (lineIndex >= 0) {
+		const line = document.lineAt(lineIndex).text;
+		const classMatch = line.match(/\s*class\s+([a-zA-Z0-9_]+)[\s:(]/);
+		
+		if (classMatch) {
+			return classMatch[1];
+		}
+		
+		lineIndex--;
+	}
+	
+	return null;
+}
+
+async function findMethodFromContext(document: vscode.TextDocument, currentLine: number): Promise<string | null> {
+	// Look for method in current function first
+	let lineIndex = currentLine;
+	const maxLinesLookup = 30; // Don't scan too many lines
+	let scanCount = 0;
+	
+	// First, look upward for a method definition
+	while (lineIndex >= 0 && scanCount < maxLinesLookup) {
+		const line = document.lineAt(lineIndex).text;
+		const methodMatch = line.match(/\s*def\s+([a-zA-Z0-9_]+)\s*\(/);
+		
+		if (methodMatch) {
+			const methodName = methodMatch[1];
+			const classInfo = await findContainingClass(document, lineIndex);
+			
+			if (classInfo) {
+				return `${classInfo}.${methodName}`;
+			}
+			return methodName;
+		}
+		
+		lineIndex--;
+		scanCount++;
+	}
+	
+	// If no method found, look for class
+	const classInfo = await findContainingClass(document, currentLine);
+	return classInfo || null;
 }
 
 // This method is called when your extension is deactivated
